@@ -6,13 +6,57 @@ import matplotlib.pyplot as plt
 df = pd.read_csv("inddata.csv")
 
 # Show the page title
-st.header("📊 Department for Transport: School Travel Insights (2019)")
+st.header("📊 School Travel Insights")
+st.subheader(" Explore How Students Travel Across the UK")
 st.caption("Explore how students travel to school across different regions and schools.")
 
 school_names = df['School Name'].dropna().unique()
 selected_school = st.selectbox("Select a School", sorted(school_names))
 
 filtered_df = df[df['School Name'] == selected_school]
+
+# transport columns
+travel_columns = [
+    'Bus (type not known)', 'Car Share', 'Car/Van', 'Cycle',
+    'Dedicated School Bus', 'Public Bus Service', 'Taxi', 'Train', 'Walk'
+]
+
+# Show the data
+if not filtered_df.empty:
+    travel_counts = filtered_df[travel_columns].iloc[0].dropna()
+    total_students = int(travel_counts.sum())
+
+    if not travel_counts.empty:
+        top_mode = travel_counts.idxmax()
+        top_value = int(travel_counts.max())
+
+        # displaying two side-by-side metric boxes
+        col1, col2 = st.columns(2)
+        col1.metric("Total Students", f"{total_students}")
+        col2.metric("Top Transport Mode", f"{top_mode}", f"{top_value} students")
+    else:
+        st.warning("No transport data available for this school.")
+else:
+    st.warning("Selected school not found.")
+
+# different types of travel in the dataset 
+travel_columns = [
+    'Bus (type not known)', 'Car Share', 'Car/Van', 'Cycle',
+    'Dedicated School Bus', 'Public Bus Service', 'Taxi', 'Train', 'Walk'
+]
+
+# Extract values for the selected school
+if not filtered_df.empty:
+    travel_counts = filtered_df[travel_columns].iloc[0].dropna()
+
+    if not travel_counts.empty:
+        top_mode = travel_counts.idxmax()
+        top_value = int(travel_counts.max())
+        st.success(f" Top mode of transport for {selected_school}: **{top_mode}** with **{top_value}** students")
+    else:
+        st.warning("No transport data available for this school.")
+else:
+    st.warning("Selected school not found.")
 
 st.subheader(f"Travel Data for {selected_school}")
 st.write(filtered_df)
